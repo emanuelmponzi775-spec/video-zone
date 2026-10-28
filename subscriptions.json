@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": 1793192017824,
+    "sessionId": "VtFrV5KGCyw-QZDuZhHHdMqlf8dJTUMs",
+    "plan": "daily",
+    "planName": "Siku 1",
+    "amount": 500,
+    "phone": "0725554630",
+    "createdAt": "2026-10-28T12:53:37.824Z",
+    "expiresAt": "2026-10-29T12:53:37.824Z"
+  }
+]

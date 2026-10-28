@@ -20,7 +20,6 @@
     h2 { margin-bottom: 22px; }
     .videos, .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
     .card { background: #1d1d29; border-radius: 12px; overflow: hidden; padding-bottom: 20px; }
-    .thumbnail { height: 145px; background: linear-gradient(135deg, #4b2058, #e33460); display: flex; align-items: center; justify-content: center; font-size: 46px; }
     .card video { width: 100%; height: 145px; background: black; object-fit: cover; }
     .card h3, .card p { margin: 15px 15px 8px; }
     .card p { color: #bdbbc9; font-size: 14px; line-height: 1.5; }
@@ -37,7 +36,6 @@
     #videoModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; align-items:center; justify-content:center; }
     #videoModal video { width:90%; max-width:800px; max-height:80vh; }
     #videoModal .close { position:absolute; top:20px; right:30px; font-size:35px; cursor:pointer; color:white; }
-    /* Pay Modal */
     #payModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1100; align-items:center; justify-content:center; padding:20px; }
     #payModal .box { background:#1d1d29; padding:28px; border-radius:14px; width:100%; max-width:380px; border:1px solid #393946; }
     #payModal input { width:100%; padding:13px; border-radius:8px; border:1px solid #393946; background:#101018; color:white; margin:12px 0; font-size:16px; }
@@ -45,158 +43,98 @@
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">VIDEO ZONE</div>
-    <nav>
-      <a href="#videos">Video</a>
-      <a href="#plans">Bei</a>
-    </nav>
-  </header>
-
+  <header><div class="logo">VIDEO ZONE</div><nav><a href="#videos">Video</a><a href="#plans">Bei</a></nav></header>
   <div class="hero">
     <h1>Karibu <span>VIDEO ZONE</span></h1>
-    <p>Gundua video za kipekee sehemu moja. Jiunge nasi kwa 500 TZS tu na ufurahie maudhui yako unayopenda.</p>
+    <p>Gundua video za kipekee sehemu moja. Jiunge nasi kwa 500 TZS tu kupitia M-Pesa na ufurahie.</p>
     <a href="#plans" class="btn">Jiunge Sasa</a>
   </div>
-
   <div id="subStatus"></div>
-
-  <section id="videos">
-    <h2>Video Zetu</h2>
-    <div class="videos" id="videoContainer">
-      <p style="color:#aaa">Inapakia video... Lipa kwanza kuona video.</p>
-    </div>
-  </section>
-
+  <section id="videos"><h2>Video Zetu</h2><div class="videos" id="videoContainer"><p style="color:#aaa">Inapakia video... Lipa kwanza kuona video.</p></div></section>
   <section id="plans">
-    <h2>Chagua Subscription Yako - Bei Mpya!</h2>
+    <h2>Chagua Subscription Yako - Lipa kwa M-Pesa!</h2>
     <div class="plans">
-      <div class="plan">
-        <h3>Siku 1</h3>
-        <div class="price">TSh 500 <span>/ siku 1</span></div>
-        <p>Access ya video zote kwa siku 1. Inafunguka mara moja baada ya kuweka namba yako.</p>
-        <button class="btn" onclick="openPay('daily')">Chagua Siku 1</button>
-      </div>
-      <div class="plan popular">
-        <span class="badge">BORA ZAIDI</span>
-        <h3>Siku 3</h3>
-        <div class="price">TSh 1,000 <span>/ siku 3</span></div>
-        <p>Okoa 500 TZS! Access ya video zote kwa siku 3. Wateja wengi wanachagua hii.</p>
-        <button class="btn" onclick="openPay('3days')">Chagua Siku 3</button>
-      </div>
-      <div class="plan">
-        <h3>Mwezi</h3>
-        <div class="price">TSh 5,000 <span>/ mwezi</span></div>
-        <p>Access ya video zote kwa siku 30. Lipa mara moja, angalia mwezi mzima.</p>
-        <button class="btn" onclick="openPay('monthly')">Chagua Mwezi</button>
-      </div>
+      <div class="plan"><h3>Siku 1</h3><div class="price">TSh 500 <span>/ siku 1</span></div><p>Access ya video zote kwa siku 1 kupitia M-Pesa.</p><button class="btn" onclick="openPay('daily')">Chagua Siku 1</button></div>
+      <div class="plan popular"><span class="badge">BORA ZAIDI</span><h3>Siku 3</h3><div class="price">TSh 1,000 <span>/ siku 3</span></div><p>Okoa 500 TZS! Access kwa siku 3.</p><button class="btn" onclick="openPay('3days')">Chagua Siku 3</button></div>
+      <div class="plan"><h3>Mwezi</h3><div class="price">TSh 5,000 <span>/ mwezi</span></div><p>Access kwa siku 30.</p><button class="btn" onclick="openPay('monthly')">Chagua Mwezi</button></div>
     </div>
     <p id="message"></p>
   </section>
-
   <footer><p>© 2026 VIDEO ZONE. Haki zote zimehifadhiwa.</p></footer>
-
-  <div id="videoModal">
-    <span class="close" onclick="closeVideo()">&times;</span>
-    <video id="modalVideo" controls autoplay></video>
-  </div>
-
+  <div id="videoModal"><span class="close" onclick="closeVideo()">&times;</span><video id="modalVideo" controls autoplay></video></div>
   <div id="payModal">
     <div class="box">
-      <h3 id="payTitle" style="font-size:20px; margin-bottom:8px;">Lipa</h3>
-      <p style="color:#bdbbc9; font-size:13px; margin-bottom:10px;">Weka namba yako ya simu tu. Video zitafunguka mara moja. Hakuna namba ya muuzaji inayoonyeshwa.</p>
+      <h3 id="payTitle" style="font-size:20px; margin-bottom:8px;">Lipa kwa M-Pesa</h3>
+      <p style="color:#bdbbc9; font-size:13px; margin-bottom:10px;">Weka namba yako ya M-Pesa. Tutakutumia meseji ya kulipia moja kwa moja kwenye simu yako.</p>
       <input id="phone" type="tel" placeholder="07XXXXXXXX">
-      <button id="payBtn" class="btn" style="width:100%;" onclick="doPay()">LIPA SASA</button>
+      <button id="payBtn" class="btn" style="width:100%;" onclick="doPay()">TUMA MESEJI YA M-PESA</button>
       <button class="btn" style="width:100%; background:#2a2a38; margin-top:8px;" onclick="closePay()">Ghairi</button>
       <p id="payMsg" style="margin-top:12px; font-size:13px; text-align:center; color:#ffb7c6;"></p>
     </div>
   </div>
-
-  <script>
+<script>
     let selectedPlan='daily';
-    
+    let pendingId=null;
     function openPay(plan){
       selectedPlan=plan;
       let title = plan==='daily' ? 'Lipa Siku 1 - 500 TZS' : plan==='3days' ? 'Lipa Siku 3 - 1,000 TZS' : 'Lipa Mwezi - 5,000 TZS';
       document.getElementById('payTitle').innerText=title;
       document.getElementById('payModal').style.display='flex';
       document.getElementById('payMsg').innerText='';
+      document.getElementById('payBtn').innerText='TUMA MESEJI YA M-PESA';
+      document.getElementById('payBtn').style.display='block';
+      document.getElementById('payBtn').disabled=false;
     }
     function closePay(){ document.getElementById('payModal').style.display='none'; }
-
-    function openVideo(filename) {
-      const modal = document.getElementById("videoModal");
-      const video = document.getElementById("modalVideo");
-      video.src = "/uploads/" + filename;
-      modal.style.display = "flex";
-    }
-    function closeVideo() {
-      const modal = document.getElementById("videoModal");
-      const video = document.getElementById("modalVideo");
-      video.pause(); video.src = ""; modal.style.display = "none";
-    }
-
+    function openVideo(filename){ document.getElementById("modalVideo").src="/uploads/"+filename; document.getElementById("videoModal").style.display="flex"; }
+    function closeVideo(){ const v=document.getElementById("modalVideo"); v.pause(); v.src=""; document.getElementById("videoModal").style.display="none"; }
     async function checkSub(){
       try{
-        const res = await fetch("/api/my-subscription");
-        const data = await res.json();
+        const res=await fetch("/api/my-subscription");
+        const data=await res.json();
         if(data.active){
-          const status = document.getElementById("subStatus");
-          status.style.display="block";
-          status.innerText = `✅ Umeactive: ${data.plan} - Inaisha: ${new Date(data.expiresAt).toLocaleString()}`;
+          const s=document.getElementById("subStatus");
+          s.style.display="block";
+          s.innerText=`✅ Umeactive: ${data.plan} - Inaisha: ${new Date(data.expiresAt).toLocaleString()}`;
           document.getElementById("plans").style.display="none";
         }
       }catch(e){}
     }
-
-    async function loadVideos() {
-      try {
-        const res = await fetch("/api/videos");
-        if(res.status===403){
-          document.getElementById("videoContainer").innerHTML = "<p style='color:#ff5475'>🔒 Lipa kwanza kuangalia video. Chagua bei hapa chini.</p>";
-          return;
-        }
-        const videos = await res.json();
-        const container = document.getElementById("videoContainer");
-        if (videos.length === 0) {
-          container.innerHTML = `<div class="card"><div class="thumbnail">▶</div><h3>Hakuna video bado</h3><p>Admin bado hajaongeza video.</p></div>`;
-          return;
-        }
-        container.innerHTML = videos.map(v => `
-          <div class="card">
-            <video src="/uploads/${v.filename}" muted></video>
-            <h3>${v.title}</h3>
-            <p>${v.description || 'Video mpya'}</p>
-            <button class="btn" onclick="openVideo('${v.filename}')">Fungua Video</button>
-          </div>
-        `).join('');
-      } catch (e) {
-        document.getElementById("videoContainer").innerHTML = "<p>Imeshindikana kupakia video</p>";
-      }
+    async function loadVideos(){
+      try{
+        const res=await fetch("/api/videos");
+        if(res.status===403){ document.getElementById("videoContainer").innerHTML="<p style='color:#ff5475'>🔒 Lipa kwanza kuangalia video. Chagua bei hapa chini kupitia M-Pesa.</p>"; return; }
+        const videos=await res.json();
+        const container=document.getElementById("videoContainer");
+        if(videos.length===0){ container.innerHTML=`<div class="card"><h3>Hakuna video bado</h3></div>`; return; }
+        container.innerHTML=videos.map(v=>`<div class="card"><video src="/uploads/${v.filename}" muted></video><h3>${v.title}</h3><button class="btn" onclick="openVideo('${v.filename}')">Fungua Video</button></div>`).join('');
+      }catch(e){ document.getElementById("videoContainer").innerHTML="<p>Imeshindikana kupakia video</p>"; }
     }
-
     async function doPay(){
       const phone=document.getElementById("phone").value;
-      if(phone.length<10){ document.getElementById("payMsg").innerText="Weka namba sahihi"; return; }
+      if(phone.length<10){ document.getElementById("payMsg").innerText="Weka namba sahihi ya M-Pesa"; return; }
       const btn=document.getElementById("payBtn");
-      btn.innerText="Inashughulikia..."; btn.disabled=true;
+      btn.innerText="Inatuma M-Pesa Push..."; btn.disabled=true;
       try{
         const r=await fetch("/api/pay",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({plan:selectedPlan,phone})});
         const d=await r.json();
         if(d.success){
-          closePay();
-          document.getElementById("message").innerText=d.message;
-          checkSub(); loadVideos();
-          document.getElementById("videoContainer").scrollIntoView({behavior:"smooth"});
-        }else{
-          document.getElementById("payMsg").innerText=d.message;
-        }
-      }catch(e){ document.getElementById("payMsg").innerText="Hitilafu ya mtandao"; }
-      btn.innerText="LIPA SASA"; btn.disabled=false;
+          pendingId=d.pendingId;
+          document.getElementById("payMsg").innerHTML=`<span style="color:#7af0a8; line-height:1.6;">${d.message}</span><br><br><div style="background:#101018; padding:12px; border-radius:8px; border:1px dashed #393946;"><p style="color:#ffd166; font-size:12px;">📱 Angalia simu yako sasa! Utaona pop-up ya M-Pesa</p></div><br><button class="btn" style="width:100%; background:#25D366;" onclick="confirmPay()">✅ NIMELIPA - THIBITISHA</button><p style="font-size:11px; margin-top:8px; color:#aaa;">Bonyeza hapa baada ya kuweka PIN yako kwenye simu</p>`;
+          btn.style.display='none';
+        }else{ document.getElementById("payMsg").innerText=d.message; btn.innerText="TUMA MESEJI YA M-PESA"; btn.disabled=false; }
+      }catch(e){ document.getElementById("payMsg").innerText="Hitilafu ya mtandao"; btn.innerText="TUMA MESEJI YA M-PESA"; btn.disabled=false; }
     }
-
-    checkSub();
-    loadVideos();
-  </script>
+    async function confirmPay(){
+      document.getElementById("payMsg").innerHTML="<span style='color:#7af0a8'>Inathibitisha malipo yako ya M-Pesa...</span>";
+      try{
+        const r=await fetch("/api/confirm-pay",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pendingId})});
+        const d=await r.json();
+        if(d.success){ closePay(); document.getElementById("message").innerText=d.message; checkSub(); loadVideos(); document.getElementById("videoContainer").scrollIntoView({behavior:"smooth"}); }
+        else{ document.getElementById("payMsg").innerText=d.message; }
+      }catch(e){ document.getElementById("payMsg").innerText="Hitilafu"; }
+    }
+    checkSub(); loadVideos();
+</script>
 </body>
 </html>

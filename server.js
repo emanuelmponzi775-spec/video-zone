@@ -17,10 +17,15 @@ if (!fs.existsSync(videosFile)) fs.writeFileSync(videosFile, "[]");
 const subsFile = path.join(__dirname, "subscriptions.json");
 if (!fs.existsSync(subsFile)) fs.writeFileSync(subsFile, "[]");
 
+const pendingFile = path.join(__dirname, "pending.json");
+if (!fs.existsSync(pendingFile)) fs.writeFileSync(pendingFile, "[]");
+
 function getVideos(){ try{return JSON.parse(fs.readFileSync(videosFile,"utf8"));}catch(e){return [];} }
 function saveVideos(v){ fs.writeFileSync(videosFile, JSON.stringify(v,null,2)); }
 function getSubs(){ try{return JSON.parse(fs.readFileSync(subsFile,"utf8"));}catch(e){return [];} }
 function saveSubs(s){ fs.writeFileSync(subsFile, JSON.stringify(s,null,2)); }
+function getPending(){ try{return JSON.parse(fs.readFileSync(pendingFile,"utf8"));}catch(e){return [];} }
+function savePending(p){ fs.writeFileSync(pendingFile, JSON.stringify(p,null,2)); }
 
 const storage = multer.diskStorage({destination:(a,b,c)=>c(null,uploadDir),filename:(a,b,c)=>c(null,Date.now()+"-"+b.originalname)});
 const upload = multer({storage});
@@ -70,12 +75,12 @@ app.get("/api/videos", (req,res)=>{
   res.json(getVideos());
 });
 
-// API: PAY - BILA NAMBA YAKO - BEI MPYA 500/1000/5000
+// STEP 1: MTEJA ANAWEKA NAMBA - TUNAMTUMIA MESEJI YA M-PESA (HAIFUNGUKI BADO)
 app.post("/api/pay", (req,res)=>{
   const { plan, phone } = req.body;
   
   if(!plan || !phone){
-    return res.status(400).json({ success:false, message: "Jaza namba yako" });
+    return res.status(400).json({ success:false, message: "Jaza namba yako ya M-Pesa" });
   }
   if(phone.length < 10){
     return res.status(400).json({ success:false, message: "Namba ya simu si sahihi" });
@@ -93,21 +98,59 @@ app.post("/api/pay", (req,res)=>{
     days = 30;
     amount = 5000;
     planName = "Mwezi";
-  } else {
-    days = 1;
-    amount = 500;
-    planName = "Siku 1";
   }
 
-  const expiresAt = new Date(Date.now() + days*24*60*60*1000);
-  
-  const newSub = {
-    id: Date.now(),
+  const pendingId = Date.now().toString();
+  const pending = getPending();
+  pending.push({
+    id: pendingId,
     sessionId: req.sessionID,
     plan,
     planName,
     amount,
+    days,
     phone,
+    createdAt: new Date().toISOString(),
+    status: 'pending'
+  });
+  savePending(pending);
+
+  console.log(`\n--- M-PESA PUSH INATUMWA ---\nKwa: ${phone}\nKiasi: ${amount} TZS\nMpango: ${planName}\nID: ${pendingId}\n----------------------------\n`);
+
+  // HAPA NDIPO AZAMPAY API ITAWEKWA BAADAYE KUTUMA PUSH YA KWELI
+  // const azamRes = await fetch('https://api.azampay.com/azampay/mno/checkout', { ... })
+
+  res.json({ 
+    success: true,
+    pendingId: pendingId,
+    message: `Tumekutumia meseji ya M-Pesa kwenye ${phone}. Kiasi: TSh ${amount}. Fungua simu yako, utaona meseji ya M-Pesa inaomba uweke PIN yako kuthibitisha malipo ya VIDEO ZONE.`,
+    amount,
+    phone
+  });
+});
+
+// STEP 2: MTEJA AKIBONYEZA "NIMELIPA" - NDIPO VIDEO ZINAFUNGUKA
+app.post("/api/confirm-pay", (req,res)=>{
+  const { pendingId } = req.body;
+  const pending = getPending();
+  const found = pending.find(p => p.id === pendingId && p.sessionId === req.sessionID);
+
+  if(!found){
+    return res.json({ success:false, message: "Malipo hayajapatikana, jaribu tena" });
+  }
+
+  // Hapa tunge-check kama M-Pesa imethibitisha: if(azamRes.status === 'SUCCESS')
+  // Kwa sasa ni simulation
+
+  const expiresAt = new Date(Date.now() + found.days*24*60*60*1000);
+  
+  const newSub = {
+    id: Date.now(),
+    sessionId: req.sessionID,
+    plan: found.plan,
+    planName: found.planName,
+    amount: found.amount,
+    phone: found.phone,
     createdAt: new Date().toISOString(),
     expiresAt: expiresAt.toISOString()
   };
@@ -118,11 +161,14 @@ app.post("/api/pay", (req,res)=>{
   saveSubs(filtered);
   req.session.customerSub = newSub;
 
-  console.log(`✅ MALIPO MPYA: ${planName} - ${amount} - Mteja: ${phone} - inaisha ${expiresAt}`);
+  // Futa pending
+  savePending(pending.filter(p => p.id !== pendingId));
+
+  console.log(`✅ M-PESA IMETHIBITISHWA: ${found.planName} - ${found.amount} - ${found.phone}`);
 
   res.json({ 
     success: true, 
-    message: `Umelipia ${planName} kwa TSh ${amount}. Video zimefunguka!`,
+    message: `Hongera! Malipo ya TSh ${found.amount} kupitia M-Pesa yamepokelewa! Video zimefunguka!`,
     subscription: newSub
   });
 });
@@ -147,4 +193,4 @@ app.use("/uploads", (req,res,next)=>{
 app.post("/logout", requireAdmin, (req,res)=>req.session.destroy(()=>res.redirect("/login")));
 app.use(express.static(__dirname,{index:false}));
 
-app.listen(PORT, ()=>console.log("VIDEO-ZONE LIVE on http://localhost:"+PORT));
+app.listen(PORT, ()=>console.log("VIDEO-ZONE M-PESA LIVE on http://localhost:"+PORT));
