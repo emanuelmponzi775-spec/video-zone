@@ -6,32 +6,142 @@ const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const fs = require("fs");
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
 const videosFile = path.join(__dirname, "videos.json");
 if (!fs.existsSync(videosFile)) fs.writeFileSync(videosFile, "[]");
+
+const subsFile = path.join(__dirname, "subscriptions.json");
+if (!fs.existsSync(subsFile)) fs.writeFileSync(subsFile, "[]");
+
 function getVideos(){ try{return JSON.parse(fs.readFileSync(videosFile,"utf8"));}catch(e){return [];} }
 function saveVideos(v){ fs.writeFileSync(videosFile, JSON.stringify(v,null,2)); }
+function getSubs(){ try{return JSON.parse(fs.readFileSync(subsFile,"utf8"));}catch(e){return [];} }
+function saveSubs(s){ fs.writeFileSync(subsFile, JSON.stringify(s,null,2)); }
+
 const storage = multer.diskStorage({destination:(a,b,c)=>c(null,uploadDir),filename:(a,b,c)=>c(null,Date.now()+"-"+b.originalname)});
 const upload = multer({storage});
+
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
-app.use(session({secret:"secret",resave:false,saveUninitialized:false}));
+app.use(session({
+  secret: process.env.SESSION_SECRET || "ponzi-videozone-secret-2024",
+  resave:false,
+  saveUninitialized:true,
+  cookie: { maxAge: 1000*60*60*24*31 } // 31 days
+}));
+
 function requireAdmin(req,res,next){ if(req.session.isAdmin) return next(); res.redirect("/login"); }
+
+// Check if customer has active subscription
+function hasActiveSub(req){
+  if(req.session.isAdmin) return true; // Admin anaona free
+  const subs = getSubs();
+  const mySub = subs.find(s => s.sessionId === req.sessionID && new Date(s.expiresAt) > new Date());
+  if(mySub) return true;
+  // Also check session cache
+  if(req.session.customerSub && new Date(req.session.customerSub.expiresAt) > new Date()){
+    return true;
+  }
+  return false;
+}
+
 app.get("/", (req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 app.get("/login", (req,res)=>res.sendFile(path.join(__dirname,"login.html")));
 app.get("/admin", requireAdmin, (req,res)=>res.sendFile(path.join(__dirname,"admin.html")));
-app.get("/api/videos", (req,res)=>res.json(getVideos()));
+
+// API: check my subscription
+app.get("/api/my-subscription", (req,res)=>{
+  const subs = getSubs();
+  const mySub = subs.find(s => s.sessionId === req.sessionID && new Date(s.expiresAt) > new Date());
+  const sessionSub = req.session.customerSub;
+  
+  let activeSub = mySub || (sessionSub && new Date(sessionSub.expiresAt) > new Date() ? sessionSub : null);
+  
+  if(activeSub){
+    res.json({ active: true, plan: activeSub.plan, expiresAt: activeSub.expiresAt });
+  } else {
+    res.json({ active: false });
+  }
+});
+
+// API: videos - only if paid or admin
+app.get("/api/videos", (req,res)=>{
+  if(!hasActiveSub(req)){
+    return res.status(403).json({ error: "SUBSCRIPTION_REQUIRED", message: "Lipa kwanza kuangalia video" });
+  }
+  res.json(getVideos());
+});
+
+// API: PAY - AUTO UNLOCK
+app.post("/api/pay", (req,res)=>{
+  const { plan, phone, txnId } = req.body;
+  
+  if(!plan || !phone || !txnId){
+    return res.status(400).json({ success:false, message: "Jaza namba, mpango na Transaction ID" });
+  }
+  if(txnId.length < 5){
+    return res.status(400).json({ success:false, message: "Transaction ID si sahihi" });
+  }
+
+  let days = 7;
+  let amount = 2000;
+  if(plan === "monthly"){
+    days = 30;
+    amount = 5000;
+  }
+
+  const expiresAt = new Date(Date.now() + days*24*60*60*1000);
+  
+  const newSub = {
+    id: Date.now(),
+    sessionId: req.sessionID,
+    plan,
+    amount,
+    phone,
+    txnId: txnId.toUpperCase(),
+    createdAt: new Date().toISOString(),
+    expiresAt: expiresAt.toISOString()
+  };
+
+  const subs = getSubs();
+  // Remove old sub for this session
+  const filtered = subs.filter(s => s.sessionId !== req.sessionID);
+  filtered.push(newSub);
+  saveSubs(filtered);
+
+  req.session.customerSub = newSub;
+
+  console.log(`✅ MALIPO MPYA: ${plan} - ${phone} - ${txnId} - inaisha ${expiresAt}`);
+
+  res.json({ 
+    success: true, 
+    message: `Malipo yamepokelewa! Umepata ${days} siku za kuangalia video.`,
+    subscription: newSub
+  });
+});
+
 app.post("/login", async (req,res)=>{
   const valid = await bcrypt.compare(req.body.password, process.env.ADMIN_PASSWORD_HASH);
   if(req.body.email!==process.env.ADMIN_EMAIL || !valid) return res.status(401).send("Login failed");
   req.session.regenerate(()=>{req.session.isAdmin=true;res.redirect("/admin");});
 });
+
 app.post("/upload", requireAdmin, upload.single("videoFile"), (req,res)=>{
   const v=getVideos(); v.unshift({id:Date.now(),title:req.body.title||req.file.originalname,description:req.body.description||"",filename:req.file.filename,date:new Date().toLocaleString()}); saveVideos(v); res.redirect("/admin");
 });
-app.use("/uploads", express.static(uploadDir));
+
+app.use("/uploads", (req,res,next)=>{
+  if(!hasActiveSub(req)){
+    return res.status(403).send("Lipa kwanza kuangalia video. Rudi nyumbani ulipie.");
+  }
+  next();
+}, express.static(uploadDir));
+
 app.post("/logout", requireAdmin, (req,res)=>req.session.destroy(()=>res.redirect("/login")));
 app.use(express.static(__dirname,{index:false}));
-app.listen(PORT, ()=>console.log("RUNNING http://localhost:"+PORT));
+
+app.listen(PORT, ()=>console.log("VIDEO-ZONE LIVE on http://localhost:"+PORT));
