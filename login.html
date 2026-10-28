@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | VIDEO ZONE</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #101010;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .login-box {
+      background: #202020;
+      padding: 30px;
+      border-radius: 12px;
+      width: 85%;
+      max-width: 350px;
+    }
+    h1 { color: #ff3030; text-align: center; }
+    label { display: block; margin-top: 15px; }
+    input {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin-top: 7px;
+      border: 1px solid #555;
+      border-radius: 6px;
+      background: #111;
+      color: white;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 22px;
+      border: none;
+      border-radius: 6px;
+      background: #ff3030;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h1>VIDEO ZONE</h1>
+    <p>Admin Login</p>
+
+    <form action="/login" method="POST">
+      <label for="email">Barua pepe</label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        placeholder="admin@videozone.co.tz"
+        required
+      >
+
+      <label for="password">Nenosiri</label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        placeholder="Weka nenosiri"
+        required
+      >
+
+      <button type="submit">INGIA</button>
+    </form>
+  </div>
+</body>
+</html>

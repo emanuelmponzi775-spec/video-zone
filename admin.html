@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | VIDEO ZONE</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #101018; color: white; padding: 25px; }
+    .container { max-width: 850px; margin: auto; }
+    h1 { color: #ff365e; margin-bottom: 10px; }
+    .subtitle { color: #c8c6d2; margin-bottom: 25px; }
+    .panel { background: #1d1d29; border: 1px solid #393946; border-radius: 12px; padding: 22px; margin-bottom: 20px; }
+    h2 { margin-bottom: 18px; }
+    label { display: block; margin: 15px 0 8px; }
+    input, select, textarea { width: 100%; padding: 12px; border-radius: 7px; border: 1px solid #444454; background: #101018; color: white; }
+    button, .home { display: inline-block; border: none; border-radius: 7px; padding: 12px 18px; margin-top: 18px; background: #ff365e; color: white; font-weight: bold; cursor: pointer; text-decoration: none; }
+    .note { color: #ffc1ce; line-height: 1.6; margin-top: 12px; font-size: 14px; }
+    #status { margin-top: 15px; color: #8df0b2; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>VIDEO ZONE</h1>
+    <p class="subtitle">Admin Dashboard — Usimamizi wa video</p>
+
+    <section class="panel">
+      <h2>Pakia Video Mpya</h2>
+      <form id="videoForm" action="/upload" method="POST" enctype="multipart/form-data">
+        <label for="title">Jina la video</label>
+        <input id="title" name="title" type="text" placeholder="Mfano: Mafunzo ya Teknolojia" required>
+
+        <label for="description">Maelezo ya video</label>
+        <textarea id="description" name="description" rows="3" placeholder="Andika maelezo mafupi"></textarea>
+
+        <label for="videoFile">Chagua video kwenye laptop</label>
+        <input id="videoFile" name="videoFile" type="file" accept="video/*" required>
+
+        <label for="access">Aina ya video</label>
+        <select id="access" name="access">
+          <option value="paid">Kwa wanachama wanaolipia</option>
+          <option value="free">Bure kwa watazamaji</option>
+        </select>
+
+        <button type="submit">Ongeza Video</button>
+      </form>
+      <p id="status"></p>
+      <p class="note">Video sasa inapakia kweli kwenye server kwenye folder ya /uploads</p>
+    </section>
+
+    <section class="panel">
+      <h2>Video Zilizochaguliwa</h2>
+      <div id="videoList">Bado hujaongeza video.</div>
+    </section>
+
+    <a class="home" href="/">Rudi kwenye Website</a>
+    <form action="/logout" method="POST" style="display:inline;"><button type="submit" style="background:#444">Logout</button></form>
+  </main>
+</body>
+</html>

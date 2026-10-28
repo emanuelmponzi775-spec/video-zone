@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIDEO ZONE | Watch More</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #101018; color: white; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 22px 7%; background: #191923; }
+    .logo { color: #ff365e; font-size: 25px; font-weight: bold; }
+    header a { color: white; text-decoration: none; margin-left: 18px; }
+    .hero { padding: 65px 7%; background: linear-gradient(120deg, #351326, #17172e); }
+    .hero h1 { font-size: clamp(32px, 6vw, 55px); margin-bottom: 15px; }
+    .hero h1 span { color: #ff365e; }
+    .hero p { color: #d0ced8; line-height: 1.7; max-width: 520px; margin-bottom: 25px; }
+    .btn { display: inline-block; background: #ff365e; color: white; border: none; padding: 13px 22px; border-radius: 7px; cursor: pointer; font-weight: bold; text-decoration: none; }
+    section { padding: 38px 7%; }
+    h2 { margin-bottom: 22px; }
+    .videos, .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+    .card { background: #1d1d29; border-radius: 12px; overflow: hidden; padding-bottom: 20px; }
+    .thumbnail { height: 145px; background: linear-gradient(135deg, #4b2058, #e33460); display: flex; align-items: center; justify-content: center; font-size: 46px; }
+    .card video { width: 100%; height: 145px; background: black; object-fit: cover; }
+    .card h3, .card p { margin: 15px 15px 8px; }
+    .card p { color: #bdbbc9; font-size: 14px; line-height: 1.5; }
+    .card .btn { margin: 8px 15px; }
+    .plan { background: #1d1d29; border: 1px solid #393946; padding: 25px; border-radius: 12px; }
+    .plan h3 { margin-bottom: 12px; }
+    .price { font-size: 28px; color: #ff5475; font-weight: bold; margin: 15px 0; }
+    .plan p { color: #c8c6d2; line-height: 1.7; margin-bottom: 18px; }
+    footer { text-align: center; padding: 25px; color: #aaa8b8; background: #191923; }
+    #message { margin-top: 15px; color: #ffb7c6; }
+    /* Modal ya video */
+    #videoModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; align-items:center; justify-content:center; }
+    #videoModal video { width:90%; max-width:800px; max-height:80vh; }
+    #videoModal .close { position:absolute; top:20px; right:30px; font-size:35px; cursor:pointer; color:white; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">VIDEO ZONE</div>
+    <nav>
+      <a href="#videos">Video</a>
+      <a href="#plans">Bei</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <h1>Karibu <span>VIDEO ZONE</span></h1>
+    <p>Gundua video za kipekee sehemu moja. Jiunge nasi kwa wiki au mwezi na ufurahie maudhui yako unayopenda.</p>
+    <a href="#plans" class="btn">Jiunge Sasa</a>
+  </div>
+
+  <section id="videos">
+    <h2>Video Zetu</h2>
+    <div class="videos" id="videoContainer">
+      <p style="color:#aaa">Inapakia video...</p>
+    </div>
+  </section>
+
+  <section id="plans">
+    <h2>Chagua Subscription Yako</h2>
+    <div class="plans">
+      <div class="plan">
+        <h3>Mpango wa Wiki</h3>
+        <div class="price">TSh 2,000</div>
+        <p>Access ya video zinazolipiwa kwa siku 7, baada ya malipo kuthibitishwa.</p>
+        <button class="btn" onclick="subscribe('wiki')">Chagua Wiki</button>
+      </div>
+      <div class="plan">
+        <h3>Mpango wa Mwezi</h3>
+        <div class="price">TSh 5,000</div>
+        <p>Access ya video zinazolipiwa kwa siku 30, baada ya malipo kuthibitishwa.</p>
+        <button class="btn" onclick="subscribe('mwezi')">Chagua Mwezi</button>
+      </div>
+    </div>
+    <p id="message"></p>
+  </section>
+
+  <footer><p>© 2026 VIDEO ZONE. Haki zote zimehifadhiwa.</p></footer>
+
+  <div id="videoModal">
+    <span class="close" onclick="closeVideo()">&times;</span>
+    <video id="modalVideo" controls autoplay></video>
+  </div>
+
+  <script>
+    function joinPlan() {
+      document.getElementById("message").textContent = "Ili kutazama video, chagua subscription hapa chini.";
+      document.getElementById("plans").scrollIntoView({ behavior: "smooth" });
+    }
+    function subscribe(plan) {
+      document.getElementById("message").textContent = "Umechagua mpango wa " + plan + ". Mfumo wa malipo utaunganishwa katika hatua inayofuata.";
+    }
+    function openVideo(filename) {
+      const modal = document.getElementById("videoModal");
+      const video = document.getElementById("modalVideo");
+      video.src = "/uploads/" + filename;
+      modal.style.display = "flex";
+    }
+    function closeVideo() {
+      const modal = document.getElementById("videoModal");
+      const video = document.getElementById("modalVideo");
+      video.pause(); video.src = ""; modal.style.display = "none";
+    }
+
+    async function loadVideos() {
+      try {
+        const res = await fetch("/api/videos");
+        const videos = await res.json();
+        const container = document.getElementById("videoContainer");
+        if (videos.length === 0) {
+          container.innerHTML = `
+            <div class="card"><div class="thumbnail">▶</div><h3>Hakuna video bado</h3><p>Admin bado hajaongeza video.</p></div>
+            <div class="card"><div class="thumbnail">🎬</div><h3>NYEGE ZONE</h3><p>Ongeza maarifa kupitia maudhui ya elimu.</p><button class="btn" onclick="joinPlan()">Fungua Video</button></div>
+            <div class="card"><div class="thumbnail">✨</div><h3>XXXX TUPU</h3><p>Tazama maudhui yanayopatikana kwa wanachama.</p><button class="btn" onclick="joinPlan()">Fungua Video</button></div>
+          `;
+          return;
+        }
+        container.innerHTML = videos.map(v => `
+          <div class="card">
+            <video src="/uploads/${v.filename}" muted></video>
+            <h3>${v.title}</h3>
+            <p>${v.description || 'Video mpya'}</p>
+            <button class="btn" onclick="openVideo('${v.filename}')">Fungua Video</button>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.log(e);
+        document.getElementById("videoContainer").innerHTML = "<p>Imeshindikana kupakia video</p>";
+      }
+    }
+    loadVideos();
+  </script>
+</body>
+</html>
