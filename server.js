@@ -31,18 +31,16 @@ app.use(session({
   secret: process.env.SESSION_SECRET || "ponzi-videozone-secret-2024",
   resave:false,
   saveUninitialized:true,
-  cookie: { maxAge: 1000*60*60*24*31 } // 31 days
+  cookie: { maxAge: 1000*60*60*24*31 }
 }));
 
 function requireAdmin(req,res,next){ if(req.session.isAdmin) return next(); res.redirect("/login"); }
 
-// Check if customer has active subscription
 function hasActiveSub(req){
-  if(req.session.isAdmin) return true; // Admin anaona free
+  if(req.session.isAdmin) return true;
   const subs = getSubs();
   const mySub = subs.find(s => s.sessionId === req.sessionID && new Date(s.expiresAt) > new Date());
   if(mySub) return true;
-  // Also check session cache
   if(req.session.customerSub && new Date(req.session.customerSub.expiresAt) > new Date()){
     return true;
   }
@@ -53,14 +51,11 @@ app.get("/", (req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 app.get("/login", (req,res)=>res.sendFile(path.join(__dirname,"login.html")));
 app.get("/admin", requireAdmin, (req,res)=>res.sendFile(path.join(__dirname,"admin.html")));
 
-// API: check my subscription
 app.get("/api/my-subscription", (req,res)=>{
   const subs = getSubs();
   const mySub = subs.find(s => s.sessionId === req.sessionID && new Date(s.expiresAt) > new Date());
   const sessionSub = req.session.customerSub;
-  
   let activeSub = mySub || (sessionSub && new Date(sessionSub.expiresAt) > new Date() ? sessionSub : null);
-  
   if(activeSub){
     res.json({ active: true, plan: activeSub.plan, expiresAt: activeSub.expiresAt });
   } else {
@@ -68,7 +63,6 @@ app.get("/api/my-subscription", (req,res)=>{
   }
 });
 
-// API: videos - only if paid or admin
 app.get("/api/videos", (req,res)=>{
   if(!hasActiveSub(req)){
     return res.status(403).json({ error: "SUBSCRIPTION_REQUIRED", message: "Lipa kwanza kuangalia video" });
@@ -76,22 +70,33 @@ app.get("/api/videos", (req,res)=>{
   res.json(getVideos());
 });
 
-// API: PAY - AUTO UNLOCK
+// API: PAY - BILA NAMBA YAKO - BEI MPYA 500/1000/5000
 app.post("/api/pay", (req,res)=>{
-  const { plan, phone, txnId } = req.body;
+  const { plan, phone } = req.body;
   
-  if(!plan || !phone || !txnId){
-    return res.status(400).json({ success:false, message: "Jaza namba, mpango na Transaction ID" });
+  if(!plan || !phone){
+    return res.status(400).json({ success:false, message: "Jaza namba yako" });
   }
-  if(txnId.length < 5){
-    return res.status(400).json({ success:false, message: "Transaction ID si sahihi" });
+  if(phone.length < 10){
+    return res.status(400).json({ success:false, message: "Namba ya simu si sahihi" });
   }
 
-  let days = 7;
-  let amount = 2000;
-  if(plan === "monthly"){
+  let days = 1;
+  let amount = 500;
+  let planName = "Siku 1";
+
+  if(plan === "3days"){
+    days = 3;
+    amount = 1000;
+    planName = "Siku 3";
+  } else if(plan === "monthly"){
     days = 30;
     amount = 5000;
+    planName = "Mwezi";
+  } else {
+    days = 1;
+    amount = 500;
+    planName = "Siku 1";
   }
 
   const expiresAt = new Date(Date.now() + days*24*60*60*1000);
@@ -100,26 +105,24 @@ app.post("/api/pay", (req,res)=>{
     id: Date.now(),
     sessionId: req.sessionID,
     plan,
+    planName,
     amount,
     phone,
-    txnId: txnId.toUpperCase(),
     createdAt: new Date().toISOString(),
     expiresAt: expiresAt.toISOString()
   };
 
   const subs = getSubs();
-  // Remove old sub for this session
   const filtered = subs.filter(s => s.sessionId !== req.sessionID);
   filtered.push(newSub);
   saveSubs(filtered);
-
   req.session.customerSub = newSub;
 
-  console.log(`✅ MALIPO MPYA: ${plan} - ${phone} - ${txnId} - inaisha ${expiresAt}`);
+  console.log(`✅ MALIPO MPYA: ${planName} - ${amount} - Mteja: ${phone} - inaisha ${expiresAt}`);
 
   res.json({ 
     success: true, 
-    message: `Malipo yamepokelewa! Umepata ${days} siku za kuangalia video.`,
+    message: `Umelipia ${planName} kwa TSh ${amount}. Video zimefunguka!`,
     subscription: newSub
   });
 });
