@@ -15,6 +15,7 @@
     .hero h1 span { color: #ff365e; }
     .hero p { color: #d0ced8; line-height: 1.7; max-width: 520px; margin-bottom: 25px; }
     .btn { display: inline-block; background: #ff365e; color: white; border: none; padding: 13px 22px; border-radius: 7px; cursor: pointer; font-weight: bold; text-decoration: none; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     section { padding: 38px 7%; }
     h2 { margin-bottom: 22px; }
     .videos, .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
@@ -24,16 +25,23 @@
     .card h3, .card p { margin: 15px 15px 8px; }
     .card p { color: #bdbbc9; font-size: 14px; line-height: 1.5; }
     .card .btn { margin: 8px 15px; }
-    .plan { background: #1d1d29; border: 1px solid #393946; padding: 25px; border-radius: 12px; }
+    .plan { background: #1d1d29; border: 1px solid #393946; padding: 25px; border-radius: 12px; position: relative; }
+    .plan.popular { border: 2px solid #ff365e; transform: scale(1.02); }
+    .badge { position: absolute; top: -12px; right: 15px; background: #ff365e; color: white; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
     .plan h3 { margin-bottom: 12px; }
     .price { font-size: 28px; color: #ff5475; font-weight: bold; margin: 15px 0; }
-    .plan p { color: #c8c6d2; line-height: 1.7; margin-bottom: 18px; }
+    .price span { font-size: 14px; color: #bdbbc9; font-weight: normal; }
+    .plan p { color: #c8c6d2; line-height: 1.7; margin-bottom: 18px; font-size: 14px; }
     footer { text-align: center; padding: 25px; color: #aaa8b8; background: #191923; }
     #message { margin-top: 15px; color: #ffb7c6; }
-    /* Modal ya video */
     #videoModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; align-items:center; justify-content:center; }
     #videoModal video { width:90%; max-width:800px; max-height:80vh; }
     #videoModal .close { position:absolute; top:20px; right:30px; font-size:35px; cursor:pointer; color:white; }
+    /* Pay Modal */
+    #payModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1100; align-items:center; justify-content:center; padding:20px; }
+    #payModal .box { background:#1d1d29; padding:28px; border-radius:14px; width:100%; max-width:380px; border:1px solid #393946; }
+    #payModal input { width:100%; padding:13px; border-radius:8px; border:1px solid #393946; background:#101018; color:white; margin:12px 0; font-size:16px; }
+    #subStatus { display:none; background:#0f2a1a; border:1px solid #1f6b3a; color:#7af0a8; padding:14px; border-radius:10px; text-align:center; margin:0 7% 20px; font-weight:bold; }
   </style>
 </head>
 <body>
@@ -47,31 +55,40 @@
 
   <div class="hero">
     <h1>Karibu <span>VIDEO ZONE</span></h1>
-    <p>Gundua video za kipekee sehemu moja. Jiunge nasi kwa wiki au mwezi na ufurahie maudhui yako unayopenda.</p>
+    <p>Gundua video za kipekee sehemu moja. Jiunge nasi kwa 500 TZS tu na ufurahie maudhui yako unayopenda.</p>
     <a href="#plans" class="btn">Jiunge Sasa</a>
   </div>
+
+  <div id="subStatus"></div>
 
   <section id="videos">
     <h2>Video Zetu</h2>
     <div class="videos" id="videoContainer">
-      <p style="color:#aaa">Inapakia video...</p>
+      <p style="color:#aaa">Inapakia video... Lipa kwanza kuona video.</p>
     </div>
   </section>
 
   <section id="plans">
-    <h2>Chagua Subscription Yako</h2>
+    <h2>Chagua Subscription Yako - Bei Mpya!</h2>
     <div class="plans">
       <div class="plan">
-        <h3>Mpango wa Wiki</h3>
-        <div class="price">TSh 2,000</div>
-        <p>Access ya video zinazolipiwa kwa siku 7, baada ya malipo kuthibitishwa.</p>
-        <button class="btn" onclick="subscribe('wiki')">Chagua Wiki</button>
+        <h3>Siku 1</h3>
+        <div class="price">TSh 500 <span>/ siku 1</span></div>
+        <p>Access ya video zote kwa siku 1. Inafunguka mara moja baada ya kuweka namba yako.</p>
+        <button class="btn" onclick="openPay('daily')">Chagua Siku 1</button>
+      </div>
+      <div class="plan popular">
+        <span class="badge">BORA ZAIDI</span>
+        <h3>Siku 3</h3>
+        <div class="price">TSh 1,000 <span>/ siku 3</span></div>
+        <p>Okoa 500 TZS! Access ya video zote kwa siku 3. Wateja wengi wanachagua hii.</p>
+        <button class="btn" onclick="openPay('3days')">Chagua Siku 3</button>
       </div>
       <div class="plan">
-        <h3>Mpango wa Mwezi</h3>
-        <div class="price">TSh 5,000</div>
-        <p>Access ya video zinazolipiwa kwa siku 30, baada ya malipo kuthibitishwa.</p>
-        <button class="btn" onclick="subscribe('mwezi')">Chagua Mwezi</button>
+        <h3>Mwezi</h3>
+        <div class="price">TSh 5,000 <span>/ mwezi</span></div>
+        <p>Access ya video zote kwa siku 30. Lipa mara moja, angalia mwezi mzima.</p>
+        <button class="btn" onclick="openPay('monthly')">Chagua Mwezi</button>
       </div>
     </div>
     <p id="message"></p>
@@ -84,14 +101,29 @@
     <video id="modalVideo" controls autoplay></video>
   </div>
 
+  <div id="payModal">
+    <div class="box">
+      <h3 id="payTitle" style="font-size:20px; margin-bottom:8px;">Lipa</h3>
+      <p style="color:#bdbbc9; font-size:13px; margin-bottom:10px;">Weka namba yako ya simu tu. Video zitafunguka mara moja. Hakuna namba ya muuzaji inayoonyeshwa.</p>
+      <input id="phone" type="tel" placeholder="07XXXXXXXX">
+      <button id="payBtn" class="btn" style="width:100%;" onclick="doPay()">LIPA SASA</button>
+      <button class="btn" style="width:100%; background:#2a2a38; margin-top:8px;" onclick="closePay()">Ghairi</button>
+      <p id="payMsg" style="margin-top:12px; font-size:13px; text-align:center; color:#ffb7c6;"></p>
+    </div>
+  </div>
+
   <script>
-    function joinPlan() {
-      document.getElementById("message").textContent = "Ili kutazama video, chagua subscription hapa chini.";
-      document.getElementById("plans").scrollIntoView({ behavior: "smooth" });
+    let selectedPlan='daily';
+    
+    function openPay(plan){
+      selectedPlan=plan;
+      let title = plan==='daily' ? 'Lipa Siku 1 - 500 TZS' : plan==='3days' ? 'Lipa Siku 3 - 1,000 TZS' : 'Lipa Mwezi - 5,000 TZS';
+      document.getElementById('payTitle').innerText=title;
+      document.getElementById('payModal').style.display='flex';
+      document.getElementById('payMsg').innerText='';
     }
-    function subscribe(plan) {
-      document.getElementById("message").textContent = "Umechagua mpango wa " + plan + ". Mfumo wa malipo utaunganishwa katika hatua inayofuata.";
-    }
+    function closePay(){ document.getElementById('payModal').style.display='none'; }
+
     function openVideo(filename) {
       const modal = document.getElementById("videoModal");
       const video = document.getElementById("modalVideo");
@@ -104,17 +136,30 @@
       video.pause(); video.src = ""; modal.style.display = "none";
     }
 
+    async function checkSub(){
+      try{
+        const res = await fetch("/api/my-subscription");
+        const data = await res.json();
+        if(data.active){
+          const status = document.getElementById("subStatus");
+          status.style.display="block";
+          status.innerText = `✅ Umeactive: ${data.plan} - Inaisha: ${new Date(data.expiresAt).toLocaleString()}`;
+          document.getElementById("plans").style.display="none";
+        }
+      }catch(e){}
+    }
+
     async function loadVideos() {
       try {
         const res = await fetch("/api/videos");
+        if(res.status===403){
+          document.getElementById("videoContainer").innerHTML = "<p style='color:#ff5475'>🔒 Lipa kwanza kuangalia video. Chagua bei hapa chini.</p>";
+          return;
+        }
         const videos = await res.json();
         const container = document.getElementById("videoContainer");
         if (videos.length === 0) {
-          container.innerHTML = `
-            <div class="card"><div class="thumbnail">▶</div><h3>Hakuna video bado</h3><p>Admin bado hajaongeza video.</p></div>
-            <div class="card"><div class="thumbnail">🎬</div><h3>NYEGE ZONE</h3><p>Ongeza maarifa kupitia maudhui ya elimu.</p><button class="btn" onclick="joinPlan()">Fungua Video</button></div>
-            <div class="card"><div class="thumbnail">✨</div><h3>XXXX TUPU</h3><p>Tazama maudhui yanayopatikana kwa wanachama.</p><button class="btn" onclick="joinPlan()">Fungua Video</button></div>
-          `;
+          container.innerHTML = `<div class="card"><div class="thumbnail">▶</div><h3>Hakuna video bado</h3><p>Admin bado hajaongeza video.</p></div>`;
           return;
         }
         container.innerHTML = videos.map(v => `
@@ -126,10 +171,31 @@
           </div>
         `).join('');
       } catch (e) {
-        console.log(e);
         document.getElementById("videoContainer").innerHTML = "<p>Imeshindikana kupakia video</p>";
       }
     }
+
+    async function doPay(){
+      const phone=document.getElementById("phone").value;
+      if(phone.length<10){ document.getElementById("payMsg").innerText="Weka namba sahihi"; return; }
+      const btn=document.getElementById("payBtn");
+      btn.innerText="Inashughulikia..."; btn.disabled=true;
+      try{
+        const r=await fetch("/api/pay",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({plan:selectedPlan,phone})});
+        const d=await r.json();
+        if(d.success){
+          closePay();
+          document.getElementById("message").innerText=d.message;
+          checkSub(); loadVideos();
+          document.getElementById("videoContainer").scrollIntoView({behavior:"smooth"});
+        }else{
+          document.getElementById("payMsg").innerText=d.message;
+        }
+      }catch(e){ document.getElementById("payMsg").innerText="Hitilafu ya mtandao"; }
+      btn.innerText="LIPA SASA"; btn.disabled=false;
+    }
+
+    checkSub();
     loadVideos();
   </script>
 </body>
