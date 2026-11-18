@@ -46,17 +46,17 @@
   <header><div class="logo">VIDEO ZONE</div><nav><a href="#videos">Video</a><a href="#plans">Bei</a></nav></header>
   <div class="hero">
     <h1>Karibu <span>VIDEO ZONE</span></h1>
-    <p>Gundua video za kipekee sehemu moja. Jiunge nasi kwa 500 TZS tu kupitia M-Pesa na ufurahie.</p>
+    <p>Gundua video za kipekee sehemu moja. Jiunge nasi kwa 1,500 TZS tu kupitia ClickPesa na ufurahie.</p>
     <a href="#plans" class="btn">Jiunge Sasa</a>
   </div>
   <div id="subStatus"></div>
   <section id="videos"><h2>Video Zetu</h2><div class="videos" id="videoContainer"><p style="color:#aaa">Inapakia video... Lipa kwanza kuona video.</p></div></section>
   <section id="plans">
-    <h2>Chagua Subscription Yako - Lipa kwa M-Pesa!</h2>
+    <h2>Chagua Subscription Yako - Lipa kwa ClickPesa!</h2>
     <div class="plans">
-      <div class="plan"><h3>Siku 1</h3><div class="price">TSh 500 <span>/ siku 1</span></div><p>Access ya video zote kwa siku 1 kupitia M-Pesa.</p><button class="btn" onclick="openPay('daily')">Chagua Siku 1</button></div>
-      <div class="plan popular"><span class="badge">BORA ZAIDI</span><h3>Siku 3</h3><div class="price">TSh 1,000 <span>/ siku 3</span></div><p>Okoa 500 TZS! Access kwa siku 3.</p><button class="btn" onclick="openPay('3days')">Chagua Siku 3</button></div>
-      <div class="plan"><h3>Mwezi</h3><div class="price">TSh 5,000 <span>/ mwezi</span></div><p>Access kwa siku 30.</p><button class="btn" onclick="openPay('monthly')">Chagua Mwezi</button></div>
+      <div class="plan popular"><span class="badge">BORA ZAIDI</span><h3>Siku 1</h3><div class="price">TSh 1,500 <span>/ siku 1</span></div><p>Access ya video zote kwa siku 1 kupitia ClickPesa - M-Pesa / Tigo Pesa / Airtel Money.</p><button class="btn" onclick="openPay('daily')">Chagua Siku 1</button></div>
+      <div class="plan"><h3>Siku 3</h3><div class="price">TSh 1,500 <span>/ siku 1</span></div><p>Kwa sasa tunayo Siku 1 tu. Siku 3 na Mwezi zinakuja hivi karibuni.</p><button class="btn" onclick="openPay('daily')">Chagua Siku 1</button></div>
+      <div class="plan"><h3>Mwezi</h3><div class="price">TSh 1,500 <span>/ siku 1</span></div><p>Kwa sasa tunayo Siku 1 tu. Mwezi unakuja hivi karibuni.</p><button class="btn" onclick="openPay('daily')">Chagua Siku 1</button></div>
     </div>
     <p id="message"></p>
   </section>
@@ -64,10 +64,10 @@
   <div id="videoModal"><span class="close" onclick="closeVideo()">&times;</span><video id="modalVideo" controls autoplay></video></div>
   <div id="payModal">
     <div class="box">
-      <h3 id="payTitle" style="font-size:20px; margin-bottom:8px;">Lipa kwa M-Pesa</h3>
-      <p style="color:#bdbbc9; font-size:13px; margin-bottom:10px;">Weka namba yako ya M-Pesa. Tutakutumia meseji ya kulipia moja kwa moja kwenye simu yako.</p>
+      <h3 id="payTitle" style="font-size:20px; margin-bottom:8px;">Lipa na ClickPesa</h3>
+      <p style="color:#bdbbc9; font-size:13px; margin-bottom:10px;">Weka namba yako ya simu, halafu bonyeza Lipa. Utaelekezwa kwenye ukurasa wa ClickPesa kulipia kwa M-Pesa / Tigo Pesa / Airtel Money.</p>
       <input id="phone" type="tel" placeholder="07XXXXXXXX">
-      <button id="payBtn" class="btn" style="width:100%;" onclick="doPay()">TUMA MESEJI YA M-PESA</button>
+      <button id="payBtn" class="btn" style="width:100%;" onclick="doPay()">LIPA NA CLICKPESA - 1,500</button>
       <button class="btn" style="width:100%; background:#2a2a38; margin-top:8px;" onclick="closePay()">Ghairi</button>
       <p id="payMsg" style="margin-top:12px; font-size:13px; text-align:center; color:#ffb7c6;"></p>
     </div>
@@ -76,12 +76,11 @@
     let selectedPlan='daily';
     let pendingId=null;
     function openPay(plan){
-      selectedPlan=plan;
-      let title = plan==='daily' ? 'Lipa Siku 1 - 500 TZS' : plan==='3days' ? 'Lipa Siku 3 - 1,000 TZS' : 'Lipa Mwezi - 5,000 TZS';
-      document.getElementById('payTitle').innerText=title;
+      selectedPlan='daily';
+      document.getElementById('payTitle').innerText='Lipa Siku 1 - 1,500 TZS';
       document.getElementById('payModal').style.display='flex';
       document.getElementById('payMsg').innerText='';
-      document.getElementById('payBtn').innerText='TUMA MESEJI YA M-PESA';
+      document.getElementById('payBtn').innerText='LIPA NA CLICKPESA - 1,500';
       document.getElementById('payBtn').style.display='block';
       document.getElementById('payBtn').disabled=false;
     }
@@ -103,7 +102,7 @@
     async function loadVideos(){
       try{
         const res=await fetch("/api/videos");
-        if(res.status===403){ document.getElementById("videoContainer").innerHTML="<p style='color:#ff5475'>🔒 Lipa kwanza kuangalia video. Chagua bei hapa chini kupitia M-Pesa.</p>"; return; }
+        if(res.status===403){ document.getElementById("videoContainer").innerHTML="<p style='color:#ff5475'>🔒 Lipa kwanza kuangalia video. Chagua bei hapa chini kupitia ClickPesa.</p>"; return; }
         const videos=await res.json();
         const container=document.getElementById("videoContainer");
         if(videos.length===0){ container.innerHTML=`<div class="card"><h3>Hakuna video bado</h3></div>`; return; }
@@ -112,25 +111,24 @@
     }
     async function doPay(){
       const phone=document.getElementById("phone").value;
-      if(phone.length<10){ document.getElementById("payMsg").innerText="Weka namba sahihi ya M-Pesa"; return; }
+      if(phone.length<10){ document.getElementById("payMsg").innerText="Weka namba sahihi ya simu"; return; }
       const btn=document.getElementById("payBtn");
-      btn.innerText="Inatuma M-Pesa Push..."; btn.disabled=true;
+      btn.innerText="Inakupeleka ClickPesa..."; btn.disabled=true;
       try{
         const r=await fetch("/api/pay",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({plan:selectedPlan,phone})});
         const d=await r.json();
-        if(d.success){
-          pendingId=d.pendingId;
-          document.getElementById("payMsg").innerHTML=`<span style="color:#7af0a8; line-height:1.6;">${d.message}</span><br><br><div style="background:#101018; padding:12px; border-radius:8px; border:1px dashed #393946;"><p style="color:#ffd166; font-size:12px;">📱 Angalia simu yako sasa! Utaona pop-up ya M-Pesa</p></div><br><button class="btn" style="width:100%; background:#25D366;" onclick="confirmPay()">✅ NIMELIPA - THIBITISHA</button><p style="font-size:11px; margin-top:8px; color:#aaa;">Bonyeza hapa baada ya kuweka PIN yako kwenye simu</p>`;
-          btn.style.display='none';
-        }else{ document.getElementById("payMsg").innerText=d.message; btn.innerText="TUMA MESEJI YA M-PESA"; btn.disabled=false; }
-      }catch(e){ document.getElementById("payMsg").innerText="Hitilafu ya mtandao"; btn.innerText="TUMA MESEJI YA M-PESA"; btn.disabled=false; }
+        if(d.success && d.gateway_url){
+          document.getElementById("payMsg").innerHTML=`<span style="color:#7af0a8;">Inakupeleka ClickPesa...</span>`;
+          window.location.href = d.gateway_url;
+        }else{ document.getElementById("payMsg").innerText=d.message || "Imeshindikana, jaribu tena"; btn.innerText="LIPA NA CLICKPESA - 1,500"; btn.disabled=false; }
+      }catch(e){ document.getElementById("payMsg").innerText="Hitilafu ya mtandao"; btn.innerText="LIPA NA CLICKPESA - 1,500"; btn.disabled=false; }
     }
     async function confirmPay(){
-      document.getElementById("payMsg").innerHTML="<span style='color:#7af0a8'>Inathibitisha malipo yako ya M-Pesa...</span>";
+      document.getElementById("payMsg").innerHTML="<span style='color:#7af0a8'>Inathibitisha malipo yako...</span>";
       try{
         const r=await fetch("/api/confirm-pay",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pendingId})});
         const d=await r.json();
-        if(d.success){ closePay(); document.getElementById("message").innerText=d.message; checkSub(); loadVideos(); document.getElementById("videoContainer").scrollIntoView({behavior:"smooth"}); }
+        if(d.success){ closePay(); document.getElementById("message").innerText="Umefanikiwa!"; checkSub(); loadVideos(); }
         else{ document.getElementById("payMsg").innerText=d.message; }
       }catch(e){ document.getElementById("payMsg").innerText="Hitilafu"; }
     }
